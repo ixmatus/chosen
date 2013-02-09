@@ -1,5 +1,8 @@
 # Chosen
 
+**Note:** This is an experimental fork implementing "fuzzy" word search (as introduced in [this issue](https://github.com/harvesthq/chosen/issues/858)).
+For the original Chosen plugin, check out https://github.com/harvesthq/chosen.
+
 Chosen is a library for making long, unwieldy select boxes more user friendly.
 
 - jQuery support: 1.4+
