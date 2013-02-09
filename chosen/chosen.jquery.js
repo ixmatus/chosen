@@ -866,8 +866,6 @@ Copyright (c) 2011 by Harvest
             if (found) {
               text = option.html;
               results += 1;
-              console.log('found: ' + results);
-              console.log('result_id: ' + result_id);
               result.html(text);
               this.result_activate(result);
               if (option.group_array_index != null) {
@@ -882,7 +880,6 @@ Copyright (c) 2011 by Harvest
           }
         }
       }
-      console.log('results', results);
       if (results < 1 && searchText.length) {
         return this.no_results(searchText);
       } else {
