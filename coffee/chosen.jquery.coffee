@@ -436,8 +436,16 @@ class Chosen extends AbstractChosen
               break
 
           if found
-            # TODO: highlight the search terms
             text = option.html
+            if searchText.length
+              for word in words
+                # FIXME: this renders broken highlight when the two words are too much
+                # alike, e.g. "b bl" searching for "black bear"
+                wregex = new RegExp(word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
+                text = text.replace(wregex, '<em>' + word + '</em>')
+              console.log('text', text)
+            else
+              console.log('text normal', text)
             results += 1
 
             result.html(text)
