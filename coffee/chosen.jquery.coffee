@@ -436,6 +436,7 @@ class Chosen extends AbstractChosen
               break
 
           if found
+            # TODO: highlight the search terms
             text = option.html
             results += 1
 
