@@ -841,7 +841,7 @@ Copyright (c) 2011 by Harvest
     };
 
     Chosen.prototype.winnow_results = function() {
-      var found, option, result, result_id, results, searchText, startpos, text, word, words, wregex, _i, _j, _k, _len, _len1, _len2, _ref;
+      var found, option, result, result_id, results, searchText, startpos, text, word, words, _i, _j, _k, _len, _len1, _len2, _ref;
       this.no_results_clear();
       results = 0;
       searchText = this.search_field.val() === this.default_text ? "" : $('<div/>').text($.trim(this.search_field.val())).html();
@@ -866,15 +866,16 @@ Copyright (c) 2011 by Harvest
             if (found) {
               text = option.html;
               if (searchText.length) {
+                words.sort(function(a, b) {
+                  return b.length - a.length;
+                });
                 for (_k = 0, _len2 = words.length; _k < _len2; _k++) {
                   word = words[_k];
-                  wregex = new RegExp(word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i');
-                  startpos = text.search(wregex);
-                  if (startpos < 0) {
-                    continue;
+                  startpos = text.toLowerCase().indexOf(word);
+                  while (startpos >= 0) {
+                    text = text.substr(0, startpos) + '<em>' + text.substr(startpos, word.length) + '</em>' + text.substr(startpos + word.length);
+                    startpos = text.toLowerCase().indexOf(word, startpos + 10);
                   }
-                  text = text.substr(0, startpos + word.length) + '</em>' + text.substr(startpos + word.length);
-                  text = text.substr(0, startpos) + '<em>' + text.substr(startpos);
                 }
               }
               results += 1;

@@ -438,15 +438,15 @@ class Chosen extends AbstractChosen
           if found
             text = option.html
             if searchText.length
+              # algorithm for highlighting looks a bit weird, because:
+              # - it has to use the original string (not the search query)
+              # - it should support queries like "b bl" for results "black bear" or "bear black"
+              words.sort (a, b) -> b.length - a.length # highlight the bigger query words first
               for word in words
-                # FIXME: this renders broken highlight when the two words are too much alike
-                # e.g. using "b bl" to search for "Black Bear", it only highlights the first "B"
-                wregex = new RegExp(word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
-                startpos = text.search wregex
-                if startpos < 0
-                  continue
-                text = text.substr(0, startpos + word.length) + '</em>' + text.substr(startpos + word.length)
-                text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
+                startpos = text.toLowerCase().indexOf word
+                while startpos >= 0
+                  text = text.substr(0, startpos) + '<em>' + text.substr(startpos, word.length) + '</em>' + text.substr(startpos + word.length)
+                  startpos = text.toLowerCase().indexOf(word, startpos + 10) # offset is 1 plus size of the added '<em></em>'
             results += 1
 
             result.html(text)
