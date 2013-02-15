@@ -393,9 +393,7 @@ class Chosen extends AbstractChosen
     results = 0
 
     searchText = if @search_field.value is @default_text then "" else @search_field.value.strip().escapeHTML()
-    regexAnchor = if @search_contains then "" else "^"
-    regex = new RegExp(regexAnchor + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
-    zregex = new RegExp(searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
+    words = searchText.toLowerCase().split(' ')
 
     for option in @results_data
       if not option.disabled and not option.empty
@@ -405,25 +403,26 @@ class Chosen extends AbstractChosen
           found = false
           result_id = option.dom_id
 
-          if regex.test option.html
-            found = true
-            results += 1
-          else if @enable_split_word_search and (option.html.indexOf(" ") >= 0 or option.html.indexOf("[") == 0)
-            #TODO: replace this substitution of /\[\]/ with a list of characters to skip.
-            parts = option.html.replace(/\[|\]/g, "").split(" ")
-            if parts.length
-              for part in parts
-                if regex.test part
-                  found = true
-                  results += 1
+          # search using lowercased word parts
+          found = true
+          for word in words
+            if option.html.toLowerCase().indexOf(word) < 0
+              found = false
+              break
 
           if found
+            text = option.html
             if searchText.length
-              startpos = option.html.search zregex
-              text = option.html.substr(0, startpos + searchText.length) + '</em>' + option.html.substr(startpos + searchText.length)
-              text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
-            else
-              text = option.html
+              # algorithm for highlighting looks a bit weird, because:
+              # - it has to use the original string (not the search query)
+              # - it should support queries like "b bl" for results "black bear" or "bear black"
+              words.sort (a, b) -> b.length - a.length # highlight the bigger query words first
+              for word in words
+                startpos = text.toLowerCase().indexOf word
+                while startpos >= 0
+                  text = text.substr(0, startpos) + '<em>' + text.substr(startpos, word.length) + '</em>' + text.substr(startpos + word.length)
+                  startpos = text.toLowerCase().indexOf(word, startpos + 10) # offset is 1 plus size of the added '<em></em>'
+            results += 1
 
             $(result_id).update text if $(result_id).innerHTML != text
 

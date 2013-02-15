@@ -828,13 +828,11 @@ Copyright (c) 2011 by Harvest
     };
 
     Chosen.prototype.winnow_results = function() {
-      var found, option, part, parts, regex, regexAnchor, result_id, results, searchText, startpos, text, zregex, _i, _j, _len, _len1, _ref;
+      var found, option, result_id, results, searchText, startpos, text, word, words, _i, _j, _k, _len, _len1, _len2, _ref;
       this.no_results_clear();
       results = 0;
       searchText = this.search_field.value === this.default_text ? "" : this.search_field.value.strip().escapeHTML();
-      regexAnchor = this.search_contains ? "" : "^";
-      regex = new RegExp(regexAnchor + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i');
-      zregex = new RegExp(searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i');
+      words = searchText.toLowerCase().split(' ');
       _ref = this.results_data;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         option = _ref[_i];
@@ -844,29 +842,30 @@ Copyright (c) 2011 by Harvest
           } else if (!(this.is_multiple && option.selected)) {
             found = false;
             result_id = option.dom_id;
-            if (regex.test(option.html)) {
-              found = true;
-              results += 1;
-            } else if (this.enable_split_word_search && (option.html.indexOf(" ") >= 0 || option.html.indexOf("[") === 0)) {
-              parts = option.html.replace(/\[|\]/g, "").split(" ");
-              if (parts.length) {
-                for (_j = 0, _len1 = parts.length; _j < _len1; _j++) {
-                  part = parts[_j];
-                  if (regex.test(part)) {
-                    found = true;
-                    results += 1;
-                  }
-                }
+            found = true;
+            for (_j = 0, _len1 = words.length; _j < _len1; _j++) {
+              word = words[_j];
+              if (option.html.toLowerCase().indexOf(word) < 0) {
+                found = false;
+                break;
               }
             }
             if (found) {
+              text = option.html;
               if (searchText.length) {
-                startpos = option.html.search(zregex);
-                text = option.html.substr(0, startpos + searchText.length) + '</em>' + option.html.substr(startpos + searchText.length);
-                text = text.substr(0, startpos) + '<em>' + text.substr(startpos);
-              } else {
-                text = option.html;
+                words.sort(function(a, b) {
+                  return b.length - a.length;
+                });
+                for (_k = 0, _len2 = words.length; _k < _len2; _k++) {
+                  word = words[_k];
+                  startpos = text.toLowerCase().indexOf(word);
+                  while (startpos >= 0) {
+                    text = text.substr(0, startpos) + '<em>' + text.substr(startpos, word.length) + '</em>' + text.substr(startpos + word.length);
+                    startpos = text.toLowerCase().indexOf(word, startpos + 10);
+                  }
+                }
               }
+              results += 1;
               if ($(result_id).innerHTML !== text) {
                 $(result_id).update(text);
               }
